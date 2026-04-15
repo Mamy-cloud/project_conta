@@ -356,16 +356,17 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
       }
 
       // ── 3. Insert collect_info_temoin ────────────────────────────────────────
+      if (!audioSupabaseId) throw new Error('audio_id manquant — insert annulé')
+
       const { data: witnessData, error: witnessError } = await supabase
         .from('collect_info_temoin')
         .insert({
-          name:           witness.name,
           first_name:     witness.first_name,
           age:            witness.age,
           accept_rgpd:    witness.accept_rgpd,
           departement_id: witness.departement_id,
           region_id:      witness.region_id,
-          audio_id:       audioSupabaseId,
+          audio_id:       audioSupabaseId as string,
         })
         .select('id')
         .single()
