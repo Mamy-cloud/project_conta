@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "conta_app_web",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
