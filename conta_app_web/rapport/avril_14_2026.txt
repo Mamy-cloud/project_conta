@@ -1,0 +1,18 @@
+-les tables pour la récupération audio offline ne marche pas
+-il est nécessaire de créé les tables
+
+1er tables, tables departement qui liste tous les département:
+id, name_departement
+
+2er tables, tables region qui liste toutes les régions et micros régions:
+id, name_region
+
+3eme table, table collect_audio qui liste les url chemin du fichier dans le cloud:
+id, url, duration, created at
+
+4eme table, table collect_info_temoin qui collecte les informations personnelles des témoins avec les relations de table 1, 2, 3.
+id, name, first_name, age, accept_rgpd
+ajoute la relation avec departements, regions_corse, collect_audio
+
+-Mis à jours database.type.ts 
+-autorisation de lire les tables depuis supabase avec le RLS

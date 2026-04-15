@@ -1,0 +1,263 @@
+@import url('https://fonts.googleapis.com/css2?family=Custom+UI:wght@400;500&display=swap');
+
+/* ─── Variables Supabase ─────────────────────────────────────────────────────
+   Palette exacte tirée de l'UI Supabase Dashboard
+   Fond : #1c1c1c / #2a2a2a  |  Accent : #3ecf8e (vert Supabase)
+   Bordures : #3e3e3e          |  Texte   : #ededed / #a0a0a0
+────────────────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.wf-wrapper {
+  --bg-base:      #1c1c1c;
+  --bg-surface:   #2a2a2a;
+  --bg-surface2:  #323232;
+  --bg-input:     #1c1c1c;
+  --border:       #3e3e3e;
+  --border-focus: #3ecf8e;
+  --accent:       #3ecf8e;
+  --accent-hover: #2fb87a;
+  --accent-dim:   rgba(62, 207, 142, 0.12);
+  --text-primary: #ededed;
+  --text-muted:   #a0a0a0;
+  --text-label:   #a0a0a0;
+  --danger:       #f66060;
+  --danger-bg:    rgba(246, 96, 96, 0.1);
+  --radius:       6px;
+  --font:         'Circular', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  font-family: var(--font);
+  min-height: 100vh;
+  background: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+
+.wf-header {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 1.5rem;
+}
+
+.wf-step {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 0.2em 0.65em;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+
+.wf-header h1 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+.wf-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* ─── Form card ────────────────────────────────────────────────────────────── */
+
+.wf-form {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* ─── Row ──────────────────────────────────────────────────────────────────── */
+
+.wf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+/* ─── Field ────────────────────────────────────────────────────────────────── */
+
+.wf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wf-field--short {
+  max-width: 120px;
+}
+
+.wf-field label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-label);
+  letter-spacing: 0.01em;
+}
+
+/* ─── Inputs ───────────────────────────────────────────────────────────────── */
+
+.wf-field input,
+.wf-field select {
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.wf-field input::placeholder {
+  color: #505050;
+}
+
+.wf-field input:hover,
+.wf-field select:hover {
+  border-color: #555;
+}
+
+.wf-field input:focus,
+.wf-field select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* number input — remove arrows */
+.wf-field input[type="number"]::-webkit-inner-spin-button,
+.wf-field input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+/* ─── Select wrapper ───────────────────────────────────────────────────────── */
+
+.wf-select-wrap {
+  position: relative;
+}
+
+.wf-arrow {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: 0.75rem;
+}
+
+/* select option colors */
+.wf-field select option {
+  background: #2a2a2a;
+  color: var(--text-primary);
+}
+
+/* ─── Loading state ────────────────────────────────────────────────────────── */
+
+.wf-select-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  color: #505050;
+}
+
+.wf-spinner {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid #3e3e3e;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: wf-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes wf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Divider ──────────────────────────────────────────────────────────────── */
+
+.wf-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.25rem 0;
+}
+
+/* ─── Required / notes ─────────────────────────────────────────────────────── */
+
+.wf-required {
+  color: var(--danger);
+}
+
+.wf-required-note {
+  font-size: 0.72rem;
+  color: #505050;
+  margin-top: -0.25rem;
+}
+
+/* ─── Error ────────────────────────────────────────────────────────────────── */
+
+.wf-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid rgba(246, 96, 96, 0.25);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ─── Submit button ────────────────────────────────────────────────────────── */
+
+.wf-btn-next {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: var(--accent);
+  color: #1c1c1c;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  margin-top: 0.25rem;
+}
+
+.wf-btn-next:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.wf-btn-next:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -14,6 +15,82 @@ export type Database = {
   }
   public: {
     Tables: {
+      collect_audio: {
+        Row: {
+          created_at: string | null
+          duration: string
+          id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          duration: string
+          id?: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          duration?: string
+          id?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      collect_info_temoin: {
+        Row: {
+          accept_rgpd: boolean
+          age: number
+          audio_id: string
+          departement_id: string
+          first_name: string
+          id: string
+          name: string
+          region_id: string
+        }
+        Insert: {
+          accept_rgpd?: boolean
+          age: number
+          audio_id: string
+          departement_id: string
+          first_name: string
+          id?: string
+          name: string
+          region_id: string
+        }
+        Update: {
+          accept_rgpd?: boolean
+          age?: number
+          audio_id?: string
+          departement_id?: string
+          first_name?: string
+          id?: string
+          name?: string
+          region_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collect_info_temoin_audio_id_fkey"
+            columns: ["audio_id"]
+            isOneToOne: false
+            referencedRelation: "collect_audio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collect_info_temoin_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collect_info_temoin_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions_corse"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consents: {
         Row: {
           allow_ai: boolean
@@ -64,6 +141,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      departements: {
+        Row: {
+          id: string
+          name_departement: string
+        }
+        Insert: {
+          id?: string
+          name_departement: string
+        }
+        Update: {
+          id?: string
+          name_departement?: string
+        }
+        Relationships: []
       }
       recordings: {
         Row: {
@@ -156,6 +248,21 @@ export type Database = {
           id?: string
           language_code?: string
           name?: string
+        }
+        Relationships: []
+      }
+      regions_corse: {
+        Row: {
+          id: string
+          name_region: string
+        }
+        Insert: {
+          id?: string
+          name_region: string
+        }
+        Update: {
+          id?: string
+          name_region?: string
         }
         Relationships: []
       }

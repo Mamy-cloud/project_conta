@@ -1,0 +1,7 @@
+-commande sql pour autoriser à lire le cloud supabase, c'est à dire autorsation du bucket
+-création de fichier src/collect_offline_first/WitnessForm.tsx pour la récupération des données personnelles du témoin
+-création de fichier src/collect_offline_first/AudioRecords.tsx pour récupérer les données Audio
+-création fichier src/collect_offline_first/transfert_cloud.ts pour le transfert des données vers le cloud
+
+Création du fichier git pour le test sur vercel
+-création de compte vercel
