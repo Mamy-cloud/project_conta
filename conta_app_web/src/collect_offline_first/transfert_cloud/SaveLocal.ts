@@ -1,11 +1,6 @@
 // ─── SaveLocal.ts ─────────────────────────────────────────────────────────────
 // Gestion IndexedDB + transfert vers Supabase
-//
-// Flux :
-//   1. WitnessForm.tsx      → saveWitnessLocally()  → IndexedDB
-//   2. AudioRecords.tsx     → saveAudioLocally()    → IndexedDB
-//                           → linkAudioToWitness()  → liaison audio_id
-//   3. SaveTransfertDataUI  → transfertToSupabase() → Supabase + supprime IndexedDB
+// Adapté aux types database.types.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { supabase } from '../../lib/supabaseClient'
@@ -15,29 +10,31 @@ import type { WitnessFormData } from '../form_witness/WitnessForm'
 
 export type SyncStatus = 'pending' | 'synced' | 'error'
 
+// Correspond à collect_info_temoin (database.types.ts)
 export interface WitnessLocalRecord {
   id?:            number
-  name:           string
+  name:           string        // ✅ présent dans DB
   first_name:     string
   age:            number
   accept_rgpd:    boolean
   departement_id: string        // FK → departements.id
   region_id:      string        // FK → regions_corse.id
-  audio_id:       number | null // FK locale → AudioLocalRecord.id
+  audio_id:       number | null // FK locale (IndexedDB) — converti en string uuid avant insert Supabase
   created_at:     string
   sync_status:    SyncStatus
   supabase_id:    string | null
 }
 
+// Correspond à collect_audio (database.types.ts)
 export interface AudioLocalRecord {
   id?:              number
   witness_local_id: number
   file_blob:        Blob
   file_name:        string
   file_type:        string
-  duration:         string        // HH:MM:SS
+  duration:         string        // HH:MM:SS → TIME en DB
   created_at:       string
-  cloud_url:        string        // vide avant upload
+  cloud_url:        string
   sync_status:      SyncStatus
   supabase_id:      string | null
 }
@@ -283,7 +280,7 @@ export async function linkAudioToWitness(params: LinkAudioParams): Promise<void>
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TRANSFERT VERS SUPABASE (appelé depuis SaveTransfertDataUI.tsx)
+// TRANSFERT VERS SUPABASE
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function transfertToSupabase(): Promise<TransfertResult> {
@@ -295,7 +292,6 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
   }
 
   const pendingWitnesses = await getPendingWitnesses()
-
   if (pendingWitnesses.length === 0) return result
 
   for (const witness of pendingWitnesses) {
@@ -325,13 +321,13 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
             .from('collect_audio')
             .getPublicUrl(filePath)
 
-          // ── 2. Insert collect_audio ────────────────────────────────────────
+          // ── 2. Insert collect_audio ──────────────────────────────────────────
           const { data: audioData, error: audioDbError } = await supabase
             .from('collect_audio')
             .insert({
               url:        publicUrl,
               duration:   audio.duration,
-              created_at: audio.created_at,
+              created_at: audio.created_at ?? undefined,
             })
             .select('id')
             .single()
@@ -340,13 +336,16 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
 
           audioSupabaseId = audioData.id
 
-          // Marque audio comme synced
-          const db = await openDB()
-          const updatedAudio = { ...audio, sync_status: 'synced' as SyncStatus, supabase_id: audioSupabaseId }
+          // Marque audio comme synced dans IndexedDB
+          const dbAudio = await openDB()
           await new Promise<void>((res, rej) => {
-            const tx = db.transaction(STORE_AUDIO, 'readwrite')
-            tx.objectStore(STORE_AUDIO).put(updatedAudio)
-            tx.oncomplete = () => { db.close(); res() }
+            const tx = dbAudio.transaction(STORE_AUDIO, 'readwrite')
+            tx.objectStore(STORE_AUDIO).put({
+              ...audio,
+              sync_status: 'synced' as SyncStatus,
+              supabase_id: audioSupabaseId,
+            })
+            tx.oncomplete = () => { dbAudio.close(); res() }
             tx.onerror    = () => rej(tx.error)
           })
 
@@ -356,17 +355,19 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
       }
 
       // ── 3. Insert collect_info_temoin ────────────────────────────────────────
-      if (!audioSupabaseId) throw new Error('audio_id manquant — insert annulé')
+      // audio_id est obligatoire (string) dans la table — on vérifie avant
+      if (!audioSupabaseId) throw new Error('audio_id Supabase manquant — insert annulé')
 
       const { data: witnessData, error: witnessError } = await supabase
         .from('collect_info_temoin')
         .insert({
+          name:           witness.name,
           first_name:     witness.first_name,
           age:            witness.age,
           accept_rgpd:    witness.accept_rgpd,
           departement_id: witness.departement_id,
           region_id:      witness.region_id,
-          audio_id:       audioSupabaseId as string,
+          audio_id:       audioSupabaseId,   // ✅ string garanti
         })
         .select('id')
         .single()
@@ -374,12 +375,15 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
       if (witnessError) throw new Error(`Témoin DB : ${witnessError.message}`)
 
       // ── 4. Marque witness comme synced puis supprime de l'IndexedDB ──────────
-      const db = await openDB()
-      const updatedWitness = { ...witness, sync_status: 'synced' as SyncStatus, supabase_id: witnessData.id }
+      const dbWitness = await openDB()
       await new Promise<void>((res, rej) => {
-        const tx = db.transaction(STORE_WITNESS, 'readwrite')
-        tx.objectStore(STORE_WITNESS).put(updatedWitness)
-        tx.oncomplete = () => { db.close(); res() }
+        const tx = dbWitness.transaction(STORE_WITNESS, 'readwrite')
+        tx.objectStore(STORE_WITNESS).put({
+          ...witness,
+          sync_status: 'synced' as SyncStatus,
+          supabase_id: witnessData.id,
+        })
+        tx.oncomplete = () => { dbWitness.close(); res() }
         tx.onerror    = () => rej(tx.error)
       })
 
@@ -399,24 +403,20 @@ export async function transfertToSupabase(): Promise<TransfertResult> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PURGE — supprime toutes les données dans IndexedDB après transfert réussi
+// PURGE
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function clearAllLocalData(): Promise<void> {
   const db = await openDB()
-
   return new Promise((resolve, reject) => {
     const tx = db.transaction([STORE_WITNESS, STORE_AUDIO], 'readwrite')
-
     tx.objectStore(STORE_WITNESS).clear()
     tx.objectStore(STORE_AUDIO).clear()
-
     tx.oncomplete = () => { db.close(); resolve() }
     tx.onerror    = () => reject(tx.error)
   })
 }
 
-// Supprime complètement la base IndexedDB (réinitialisation totale)
 export function deleteDatabase(): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase('conta_db')

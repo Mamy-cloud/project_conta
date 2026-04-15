@@ -3,7 +3,7 @@
 -création de database type
 en mode terminal:
 npx supabase login
-npx supabase gen types typescript --project-id TON_PROJECT_ID > src/lib/database.types.ts
+
 
 
 
