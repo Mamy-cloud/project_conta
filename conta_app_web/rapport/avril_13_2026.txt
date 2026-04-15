@@ -2,7 +2,7 @@
 -en attente des log de Supabase pour la création de base de donné
 -création de database type
 en mode terminal:
-npx supabase login
+npx supabase login.
 
 
 
